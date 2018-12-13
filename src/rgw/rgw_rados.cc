@@ -2669,7 +2669,8 @@ int RGWPutObjProcessor_Atomic::prepare(RGWRados *store, string *oid_rand)
     store->gen_rand_obj_instance_name(&head_obj);
   }
 
-  manifest.set_prefix(obj_str + *oid_rand);
+  if (oid_rand != nullptr)
+    manifest.set_prefix(obj_str + *oid_rand);
   // if fdb, use part_num 1
   /*
   manifest.set_trivial_rule(max_chunk_size, store->ctx()->_conf->rgw_obj_stripe_size, 1);
