@@ -7079,7 +7079,6 @@ int RGWHandler::do_read_permissions(RGWOp *op, bool only_bucket)
     if (ret == -ENODATA)
       ret = -EACCES;
   }
-  return 0; // hook here
   return ret;
 }
 
