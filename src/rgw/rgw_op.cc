@@ -2020,6 +2020,7 @@ void RGWListBuckets::execute()
     for (const auto& kv : m) {
       const auto& bucket = kv.second;
 
+      ldout(s->cct, 1) << "DEBUGLC: bucket count " << bucket.count << dendl;
       global_stats.bytes_used += bucket.size;
       global_stats.bytes_used_rounded += bucket.size_rounded;
       global_stats.objects_count += bucket.count;
@@ -3527,11 +3528,15 @@ void RGWPutObj::execute()
     }
   }
 
-  char buf[33];
-  gen_rand_alphanumeric(store->ctx(), buf, sizeof(buf) - 1);
-  oid_rand.append(buf);
+  if (s->bucket_info.index_type != RGWBIType_FDB) {
+    op_ret = processor->prepare(store, NULL);
+  } else {
+    char buf[33];
+    gen_rand_alphanumeric(store->ctx(), buf, sizeof(buf) - 1);
+    oid_rand.append(buf);
 
-  op_ret = processor->prepare(store, &oid_rand);
+    op_ret = processor->prepare(store, &oid_rand);
+  }
   if (op_ret < 0) {
     ldout(s->cct, 20) << "processor->prepare() returned ret=" << op_ret
 		      << dendl;

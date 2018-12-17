@@ -2669,9 +2669,7 @@ int RGWPutObjProcessor_Atomic::prepare(RGWRados *store, string *oid_rand)
     store->gen_rand_obj_instance_name(&head_obj);
   }
 
-  if (oid_rand != nullptr)
-    manifest.set_prefix(obj_str + *oid_rand);
-  // if fdb, use part_num 1
+ // if fdb, use part_num 1
   /*
   manifest.set_trivial_rule(max_chunk_size, store->ctx()->_conf->rgw_obj_stripe_size, 1);
   manifest.set_max_head_size(0);
@@ -2679,6 +2677,9 @@ int RGWPutObjProcessor_Atomic::prepare(RGWRados *store, string *oid_rand)
   */
 
   if (bucket_info.index_type == RGWBIType_FDB) {
+    if (oid_rand != nullptr)
+      manifest.set_prefix(obj_str + *oid_rand);
+ 
     manifest.set_fdb_rule(max_chunk_size, store->ctx()->_conf->rgw_obj_stripe_size);
  
     r = manifest_gen.create_begin(store->ctx(), &manifest, bucket_info.placement_rule, head_obj.bucket, head_obj);
