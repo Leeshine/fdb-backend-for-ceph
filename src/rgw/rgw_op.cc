@@ -586,7 +586,7 @@ int rgw_build_object_policies(RGWRados *store, struct req_state *s,
       if (ret.res != 0)
 	return -ERR_FDB_ERROR;
       else if (!exist) 
-	return -ERR_NOT_FOUND;
+	return -ENOENT;
       else {
 	rgw_obj_key::parse_raw_oid(fdb_value, &obj.key);
       }
@@ -801,7 +801,7 @@ void RGWGetObjTags::execute()
       op_ret = -ERR_FDB_ERROR;
       return;
     } else if (!exist) {
-      op_ret = -ERR_NOT_FOUND;
+      op_ret = -ENOENT;
       return;
     } else {
       rgw_obj_key::parse_raw_oid(fdb_value, &obj.key);
@@ -857,7 +857,7 @@ void RGWPutObjTags::execute()
       op_ret = -ERR_FDB_ERROR;
       return;
     } else if (!exist) {
-      op_ret = -ERR_NOT_FOUND;
+      op_ret = -ENOENT;
       return;
     } else {
       rgw_obj_key::parse_raw_oid(fdb_value, &obj.key);
@@ -906,7 +906,7 @@ void RGWDeleteObjTags::execute()
       op_ret = -ERR_FDB_ERROR;
       return;
     } else if (!exist) {
-      op_ret = -ERR_NOT_FOUND;
+      op_ret = -ENOENT;
       return;
     } else {
       rgw_obj_key::parse_raw_oid(fdb_value, &obj.key);
@@ -4994,7 +4994,7 @@ void RGWPutACLs::execute()
 	op_ret = -ERR_FDB_ERROR;
 	return;
       } else if (!exist) {
-	op_ret = -ERR_NOT_FOUND;
+	op_ret = -ENOENT;
 	return;
       } else {
 	rgw_obj_key::parse_raw_oid(fdb_value, &obj.key);
