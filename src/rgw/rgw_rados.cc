@@ -5748,6 +5748,11 @@ int RGWRados::Bucket::List::list_objects_ordered(int64_t max,
           continue;
         }
 
+        if (count >= max) {
+          truncated = true;
+          goto done;
+        }
+
         rgw_bucket_dir_entry ent;
         bufferlist out;
         ceph::buffer::list::iterator p = out.begin();
