@@ -1875,6 +1875,10 @@ struct req_state {
   req_state(CephContext* _cct, RGWEnv* e, RGWUserInfo* u);
   ~req_state();
 
+  bool is_multipart() const { return op_type == RGW_OP_INIT_MULTIPART 
+    || op_type == RGW_OP_COMPLETE_MULTIPART || op_type == RGW_OP_ABORT_MULTIPART 
+      || op_type == RGW_OP_LIST_MULTIPART || op_type == RGW_OP_LIST_BUCKET_MULTIPARTS ; }
+
   bool is_err() const { return err.is_err(); }
 };
 

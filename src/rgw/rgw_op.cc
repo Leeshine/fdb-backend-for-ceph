@@ -578,7 +578,8 @@ int rgw_build_object_policies(RGWRados *store, struct req_state *s,
 
     rgw_obj obj(s->bucket, s->object);
 
-    if (s->bucket_info.index_type == RGWBIType_FDB) {
+    // not in_extar_data
+    if (s->bucket_info.index_type == RGWBIType_FDB && s->info.args.get("uploadId").empty()) {
       std::string fdb_key = obj.get_fdb_head_key();
       std::string fdb_value;
       bool exist;

@@ -5703,7 +5703,6 @@ int RGWRados::Bucket::List::list_objects_ordered(int64_t max,
         ldout(cct, 20) << " setting marker_str= " << marker_str << dendl;
       }
       keyvalues kvs;
-      ldout(cct, 20) << "TESTLV2 " << marker_str << dendl;
       auto err = fdb_list_key_value(store->fdb_database, marker_str, endMarker,
           max, kvs, truncated);
       ldout(cct, 20) << "ListBucket: fdb returns " << err.res << " and " << err.e
@@ -5719,7 +5718,6 @@ int RGWRados::Bucket::List::list_objects_ordered(int64_t max,
 
       cur_marker = kvs[kvs.size()-1].first;
       for (auto &&kv : kvs) {
-        ldout(cct, 0) << "TESTLV1 " << kv.first << dendl;
         std::string obj_name = kv.first.substr(const_str.size());
         int delim_pos = obj_name.find(delim_str, params.prefix.size());
         if (delim_pos >= 0) {
