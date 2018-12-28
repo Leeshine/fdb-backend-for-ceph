@@ -2680,8 +2680,9 @@ int RGWPutObjProcessor_Atomic::prepare(RGWRados *store, string *oid_rand)
     if (oid_rand != nullptr)
       manifest.set_prefix(obj_str + *oid_rand);
  
-    manifest.set_fdb_rule(max_chunk_size, store->ctx()->_conf->rgw_obj_stripe_size);
+    // manifest.set_fdb_rule(max_chunk_size, store->ctx()->_conf->rgw_obj_stripe_size);
  
+    manifest.set_trivial_rule(max_chunk_size, store->ctx()->_conf->rgw_obj_stripe_size);
     r = manifest_gen.create_begin(store->ctx(), &manifest, bucket_info.placement_rule, head_obj.bucket, head_obj);
 
     cur_obj = manifest_gen.get_cur_obj(store);
@@ -5697,6 +5698,8 @@ int RGWRados::Bucket::List::list_objects_ordered(int64_t max,
     std::string skip_after_delim;
     std::string cur_marker;
 
+    ldout(cct,0) << "DEBUGLC: " << __func__ << " " << marker_str << " " << endMarker << dendl;
+
     while (truncated && count <= max) {
       if (skip_after_delim > marker_str) {
         marker_str = skip_after_delim;
@@ -5785,6 +5788,9 @@ int RGWRados::Bucket::List::list_objects_ordered(int64_t max,
     string cur_prefix = prefix_obj.get_index_key_name();
 
     string bigger_than_delim;
+
+
+    ldout(cct,0) << "DEBUGLC: " << __func__ << " " << cur_marker << " " << cur_end_marker << dendl;
 
     if (!params.delim.empty()) {
       unsigned long val = decode_utf8((unsigned char *)params.delim.c_str(), params.delim.size());
@@ -9597,7 +9603,7 @@ int RGWRados::get_obj_state_impl(RGWObjectCtx *rctx, const RGWBucketInfo& bucket
   bool need_follow_olh = follow_olh && obj.key.instance.empty();
 
   RGWObjState *s = rctx->obj.get_state(obj);
-  ldout(cct, 20) << "get_obj_state: rctx=" << (void *)rctx << " obj=" << obj << " state=" << (void *)s << " s->prefetch_data=" << s->prefetch_data << dendl;
+  ldout(cct, 20) << "get_obj_state: rctx=" << (void *)rctx << " obj=" << obj << " state=" << (void *)s << " s->prefetch_data=" << s->prefetch_data << " has_manifest=" << s->has_manifest << dendl;
   *state = s;
   if (s->has_attrs) {
     if (s->is_olh && need_follow_olh) {
@@ -9968,6 +9974,8 @@ int RGWRados::Object::prepare_atomic_modification(ObjectWriteOperation& op, bool
     }
 
     if (if_match) {
+
+      ldout(store->ctx(), 10) << "LCDEBUG: prepare_atomic_modification: "<< dendl;
       if (strcmp(if_match, "*") == 0) {
         // test the object is existing
         if (!state->exists) {
@@ -9977,7 +9985,11 @@ int RGWRados::Object::prepare_atomic_modification(ObjectWriteOperation& op, bool
         bufferlist bl;
         if (!state->get_attr(RGW_ATTR_ETAG, bl) ||
             strncmp(if_match, bl.c_str(), bl.length()) != 0) {
+	  {
+
+	  ldout(store->ctx(), 10) << "LCDEBUG: prepare_atomic_modification: "<< bl << " " << if_match << dendl;
           return -ERR_PRECONDITION_FAILED;
+	  }
         }
       }
     }
@@ -12017,6 +12029,7 @@ int RGWRados::raw_obj_stat(rgw_raw_obj& obj, uint64_t *psize, real_time *pmtime,
                            map<string, bufferlist> *attrs, bufferlist *first_chunk,
                            RGWObjVersionTracker *objv_tracker)
 {
+  ldout(cct, 0) << "DEBUGLC: raw_obj_stat " << obj << dendl;
   rgw_rados_ref ref;
   int r = get_raw_obj_ref(obj, &ref);
   if (r < 0) {
