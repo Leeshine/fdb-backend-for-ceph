@@ -3351,6 +3351,22 @@ int RGWPutObj::get_data(const off_t fst, const off_t lst, bufferlist& bl)
 
   rgw_obj_key obj_key(copy_source_object_name, copy_source_version_id);
   rgw_obj obj(copy_source_bucket_info.bucket, obj_key);
+  if(s->bucket_info.index_type == RGWBIType_FDB) {
+    std::string fdb_key = obj.get_fdb_head_key();
+    std::string fdb_value;
+    bool exist;
+    auto op_ret = fdb_get_key_value(store->fdb_database, fdb_key, fdb_value, exist);
+    if (op_ret.res != 0) {
+      ldout(s->cct, 0) << "DEBUGLC: fdb op ret: " << op_ret.res<< dendl;
+    } else if (!exist) {
+      ret = -ENOENT;
+    } else {
+      rgw_obj_key::parse_raw_oid(fdb_value, &obj.key);
+    }
+  }
+
+  if(ret < 0) 
+    return ret;
 
   RGWRados::Object op_target(store, copy_source_bucket_info, *static_cast<RGWObjectCtx *>(s->obj_ctx), obj);
   RGWRados::Object::Read read_op(&op_target);
